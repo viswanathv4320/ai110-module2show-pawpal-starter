@@ -22,6 +22,15 @@ Your final app should:
 - Display the plan clearly (and ideally explain the reasoning)
 - Include tests for the most important scheduling behaviors
 
+## Smarter Scheduling
+
+The scheduling logic was enhanced with:
+
+- Priority-based sorting with duration as a secondary key for efficient time usage  
+- Task filtering by pet and completion status  
+- Support for recurring tasks (daily, weekly) with automatic regeneration  
+- Lightweight conflict detection for overlapping tasks per pet
+
 ## Getting started
 
 ### Setup

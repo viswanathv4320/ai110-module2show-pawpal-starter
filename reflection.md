@@ -45,6 +45,10 @@ I updated add_task() and remove_task() to keep total_duration consistent wheneve
 - Describe one tradeoff your scheduler makes.
 - Why is that tradeoff reasonable for this scenario?
 
+Detecting conflicts when multiple tasks are scheduled for the same pet on the same day.
+Tradeoff:
+A nested loop is simpler and easier to read, while a grouping-based approach is more efficient but more complex. The simpler approach was chosen since the task size is small.
+
 ---
 
 ## 3. AI Collaboration

@@ -31,3 +31,40 @@ plan.add_task(task4)
 plan.generate()
 
 plan.display()
+
+# Mark one task complete to make status filtering interesting
+task2.mark_complete()
+
+# All tasks (sorted by priority after generate())
+print("\n--- All Scheduled Tasks ---")
+for task in plan.tasks:
+    print(task.get_details())
+
+# Filter by pet name
+print("\n--- Tasks for Max ---")
+for task in plan.filter_by_pet("Max"):
+    print(task.get_details())
+
+# Filter by completion status
+print("\n--- Pending Tasks ---")
+for task in plan.filter_by_status(completed=False):
+    print(task.get_details())
+
+print("\n--- Completed Tasks ---")
+for task in plan.filter_by_status(completed=True):
+    print(task.get_details())
+
+# Conflict detection — two tasks for Max on the same due_date
+conflict_date = date(2026, 4, 1)
+task5 = Task("Walk Max", "Exercise", 20, Priority.MEDIUM, dog, due_date=conflict_date)
+task6 = Task("Bathe Max", "Grooming", 15, Priority.LOW, dog, due_date=conflict_date)
+plan.add_task(task5)
+plan.add_task(task6)
+
+print("\n--- Conflict Warnings ---")
+warnings = plan.get_conflicts()
+if warnings:
+    for w in warnings:
+        print(w)
+else:
+    print("No conflicts found.")
