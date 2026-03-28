@@ -1,6 +1,10 @@
 # PawPal+ Project Reflection
 
 ## 1. System Design
+The following actions user should perform,
+1) Add a pet
+2) Track the meds required
+3) View today's care plan
 
 **a. Initial design**
 
