@@ -9,12 +9,27 @@ The following actions user should perform,
 **a. Initial design**
 
 - Briefly describe your initial UML design.
+The UML models a pet care scheduling system where an Owner manages multiple Pets and views DailyPlans. Each DailyPlan represents a specific day and contains multiple Tasks. Tasks define activities like feeding or walking, and each task is associated with a specific Pet.
+
 - What classes did you include, and what responsibilities did you assign to each?
+I included four main classes:
+Owner – stores basic user information, manages pets, and views daily plans.
+Pet – stores details about each pet like name, species, and age.
+DailyPlan – represents a schedule for a specific day and manages a list of tasks.
+Task – represents individual activities like feeding or walking, including duration, priority, completion status, and the pet it is assigned to.
 
 **b. Design changes**
 
 - Did your design change during implementation?
+Yes, the design did change slightly during implementation.
+
 - If yes, describe at least one change and why you made it.
+I removed the unused field import since it wasn’t being used.
+I introduced a Priority Enum to restrict values to low, medium, and high.
+I changed Task.priority from a string to the Priority Enum to ensure valid inputs.
+I added a plans list and a get_plans() method in the Owner class so the Owner can actually store and retrieve daily plans.
+I added an owner reference inside DailyPlan so that generate() can access constraints like available time.
+I updated add_task() and remove_task() to keep total_duration consistent whenever tasks are added or removed.
 
 ---
 
