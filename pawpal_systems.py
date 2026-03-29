@@ -4,6 +4,14 @@ from datetime import date, timedelta
 from enum import Enum
 
 
+def _minutes_to_time(minutes: int) -> str:
+    """Convert minutes-from-midnight to a human-readable 12-hour clock string."""
+    h, m = divmod(minutes % 1440, 60)
+    period = "AM" if h < 12 else "PM"
+    h12 = h % 12 or 12
+    return f"{h12}:{m:02d} {period}"
+
+
 class Priority(Enum):
     LOW = "low"
     MEDIUM = "medium"
@@ -32,6 +40,50 @@ class Task:
     is_completed: bool = False
     recurrence: str = "once"          # "once" | "daily" | "weekly"
     due_date: Optional[date] = field(default=None)
+    slot_start: Optional[int] = field(default=None)   # minutes from midnight
+    slot_end: Optional[int] = field(default=None)     # minutes from midnight
+
+    def weight_score(self, today: Optional[date] = None) -> int:
+        """Compute a numeric scheduling weight for this task.
+
+        Higher score = schedule sooner. Factors:
+          - Priority level      (HIGH=100, MEDIUM=50, LOW=10)
+          - Due-date urgency    (overdue +50, today +30, tomorrow +15, ≤3 days +5)
+          - Task type           (medical +20, feeding +10, exercise +5, grooming +3)
+          - Senior-pet medical  (age ≥ 7 AND medical → +10)
+          - Daily recurrence    (+5, consistent care matters)
+        """
+        today = today or date.today()
+        priority_base = {Priority.HIGH: 100, Priority.MEDIUM: 50, Priority.LOW: 10}
+        score = priority_base[self.priority]
+
+        if self.due_date:
+            days_until = (self.due_date - today).days
+            if days_until < 0:
+                score += 50
+            elif days_until == 0:
+                score += 30
+            elif days_until == 1:
+                score += 15
+            elif days_until <= 3:
+                score += 5
+
+        type_bonus = {"medical": 20, "feeding": 10, "exercise": 5, "grooming": 3, "play": 1}
+        score += type_bonus.get(self.task_type, 0)
+
+        if self.task_type == "medical" and self.pet.age >= 7:
+            score += 10
+
+        if self.recurrence == "daily":
+            score += 5
+
+        return score
+
+    def time_slot(self) -> str:
+        """Return the assigned time range as a human-readable string, or '—' if unscheduled."""
+        if self.slot_start is not None and self.slot_end is not None:
+            return f"{_minutes_to_time(self.slot_start)} – {_minutes_to_time(self.slot_end)}"
+        return "—"
 
     def mark_complete(self) -> Optional["Task"]:
         """Mark this task as completed. Returns a new Task for the next occurrence if recurring."""
@@ -87,28 +139,49 @@ class DailyPlan:
         self.total_duration: int = 0
         self.reasoning: str = ""
 
-    def generate(self):
-        """Sort tasks by priority and schedule as many as fit within the owner's available time."""
-        priority_order = {Priority.HIGH: 0, Priority.MEDIUM: 1, Priority.LOW: 2}
-        self.tasks.sort(key=lambda t: (priority_order[t.priority], t.duration))
+    def generate(self, day_start_minutes: int = 480):
+        """Schedule tasks using weighted priority scoring and assign clock-time slots.
+
+        Tasks are ranked by weight_score() (higher = sooner) instead of a raw
+        HIGH/MEDIUM/LOW bucket, so urgency, task type, and pet age all influence
+        the order.  Each scheduled task receives a slot_start / slot_end (minutes
+        from midnight) so callers can display real clock times.
+
+        Args:
+            day_start_minutes: When the day begins in minutes from midnight.
+                               Default 480 = 8:00 AM.
+        """
+        today = self.date
+        self.tasks.sort(key=lambda t: -t.weight_score(today))
 
         avail = self.owner.available_time_per_day
         scheduled, skipped = [], []
+        current_minute = day_start_minutes
         time_used = 0
+
         for task in self.tasks:
             if time_used + task.duration <= avail:
-                scheduled.append(task)
+                task.slot_start = current_minute
+                task.slot_end = current_minute + task.duration
+                current_minute += task.duration
                 time_used += task.duration
+                scheduled.append(task)
             else:
+                task.slot_start = None
+                task.slot_end = None
                 skipped.append(task)
 
         self.tasks = scheduled
         self.total_duration = time_used
 
-        self.reasoning = f"Scheduled {len(scheduled)} task(s) using {time_used} of {avail} min available."
+        next_slot = _minutes_to_time(current_minute) if scheduled else _minutes_to_time(day_start_minutes)
+        self.reasoning = (
+            f"Scheduled {len(scheduled)} task(s) using {time_used} of {avail} min available. "
+            f"Next available slot: {next_slot}."
+        )
         if skipped:
             skipped_names = ", ".join(t.name for t in skipped)
-            self.reasoning += f" Skipped {len(skipped)} low-priority task(s) due to time limits: {skipped_names}"
+            self.reasoning += f" Skipped {len(skipped)} task(s) due to time limits: {skipped_names}"
 
     def add_task(self, task: Task):
         """Add a task to the plan and update the total duration."""

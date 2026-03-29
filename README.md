@@ -14,15 +14,15 @@ A busy pet owner needs help staying consistent with pet care. They want an assis
 
 ---
 
-## What you will build
+## How It Works
 
-Your final app should:
+PawPal+ follows a simple three-step flow:
 
-- Let a user enter basic owner + pet info  
-- Let a user add/edit tasks (duration + priority at minimum)  
-- Generate a daily schedule/plan based on constraints and priorities  
-- Display the plan clearly (and ideally explain the reasoning)  
-- Include tests for the most important scheduling behaviors  
+1. **Owner Setup** — Enter your name and how much time you have available each day (in minutes). This becomes the daily time budget the scheduler works within.
+
+2. **Pet & Task Management** — Add one or more pets with their species, breed, and age. Then create care tasks for each pet — specifying the type (feeding, medical, exercise, etc.), duration, priority, recurrence, and due date.
+
+3. **Schedule Generation** — PawPal+ ranks all pending tasks using a weighted scoring algorithm and fits as many as possible into your available time. Each scheduled task is assigned a real clock-time slot (e.g. 8:00 AM – 8:30 AM), and the app explains what was scheduled, what was skipped, and when your next free slot is.
 
 ---
 
@@ -30,12 +30,34 @@ Your final app should:
 
 The scheduling logic includes:
 
-- Priority-based sorting with duration as a secondary key for efficient time usage  
+- Priority-based scheduling with duration as a secondary factor to maximize task completion within a time budget  
+- Time-constrained planning that schedules tasks up to the owner's available daily time  
 - Task filtering by pet and completion status  
 - Support for recurring tasks (daily, weekly) with automatic regeneration  
-- Lightweight conflict detection for overlapping tasks per pet  
+- Conflict detection for tasks assigned to the same pet on the same date
 
 ---
+
+## Advanced Algorithmic Capability
+
+To extend beyond basic priority-based scheduling, PawPal+ introduces two additional algorithmic improvements:
+
+### Weighted Priority Scoring
+Tasks are assigned a dynamic score based on multiple factors such as priority level, urgency (due date), task type, recurrence, and pet condition.  
+This allows the system to prioritize tasks more intelligently than simple HIGH/MEDIUM/LOW sorting.
+
+### Time-Based Scheduling (Next Available Slot)
+Tasks are scheduled sequentially within the owner's available time, and each task is assigned a specific time window.  
+The system also computes the next available free time slot after scheduling.
+
+### Why this improves the system
+These enhancements make the scheduler:
+- more realistic (accounts for urgency and context)
+- more flexible (adapts to different task types and pets)
+- more interpretable (users can see why tasks are ordered and when to perform them)
+
+### Role of Agent Mode
+Agent Mode was used to iteratively refine the scoring logic and extend the scheduling algorithm from simple sorting to time-based planning.
 
 ## Getting Started
 
@@ -107,17 +129,23 @@ All 14 tests are passing successfully.
 
 ⭐⭐⭐⭐☆ (4/5)
 
-The system is reliable for current functionality, including scheduling, recurrence, and conflict detection.  
+The system is reliable for current functionality, including scheduling, recurrence, and conflict detection.
 Confidence is slightly reduced due to the absence of intra-day time-based conflict handling.
 
 ---
 
-## Development Workflow (Optional)
+## Project Files
 
-1. Read the scenario and identify requirements and edge cases  
-2. Draft a UML diagram (classes, attributes, methods, relationships)  
-3. Convert UML into Python class stubs  
-4. Implement scheduling logic incrementally  
-5. Add tests to verify key behaviors  
-6. Connect logic to the Streamlit UI (`app.py`)  
-7. Refine UML to match the final implementation  
+- `app.py` — Streamlit UI and state handling
+- `pawpal_systems.py` — domain model (`Owner`, `Pet`, `Task`) and scheduler
+- `tests/test_pawpal.py` — pytest coverage for core scheduling and model behavior
+
+---
+
+## Demo
+
+![Screenshot 1](1.png)
+![Screenshot 2](2.png)
+![Screenshot 3](3.png)
+![Screenshot 4](4.png)
+![Screenshot 5](5.png)

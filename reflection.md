@@ -2,16 +2,14 @@
 
 ## 1. System Design
 The following actions user should perform,
-1) Add a pet
-2) Track the meds required
-3) View today's care plan
+1) Add a pet - Enter details about your pet, such as name, species, breed, and age.
+2) Add tasks - Provide the tasks that need to be done, including duration, priority, frequency, and due date.
+3) Generate and view today’s plan - Create a daily schedule and view the ordered plan based on priorities and available time.
 
 **a. Initial design**
 
-- Briefly describe your initial UML design.
 The UML models a pet care scheduling system where an Owner manages multiple Pets and views DailyPlans. Each DailyPlan represents a specific day and contains multiple Tasks. Tasks define activities like feeding or walking, and each task is associated with a specific Pet.
 
-- What classes did you include, and what responsibilities did you assign to each?
 I included four main classes:
 Owner – stores basic user information, manages pets, and views daily plans.
 Pet – stores details about each pet like name, species, and age.
@@ -20,10 +18,8 @@ Task – represents individual activities like feeding or walking, including dur
 
 **b. Design changes**
 
-- Did your design change during implementation?
-Yes, the design did change slightly during implementation.
+The design did change slightly during implementation.
 
-- If yes, describe at least one change and why you made it.
 I removed the unused field import since it wasn’t being used.
 I introduced a Priority Enum to restrict values to low, medium, and high.
 I changed Task.priority from a string to the Priority Enum to ensure valid inputs.
@@ -37,13 +33,13 @@ I updated add_task() and remove_task() to keep total_duration consistent wheneve
 
 **a. Constraints and priorities**
 
-- What constraints does your scheduler consider (for example: time, priority, preferences)?
-- How did you decide which constraints mattered most?
+The scheduler considers available time, task priority, and urgency.
+
+The most important constraint is the owner’s available time, so only tasks that fit within that time are scheduled. Tasks are then ordered by priority (high, medium, low).
+
+Urgency is also considered through weighted scoring, where tasks due sooner, medical tasks, and tasks for older pets are given higher importance.
 
 **b. Tradeoffs**
-
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
 
 Detecting conflicts when multiple tasks are scheduled for the same pet on the same day.
 Tradeoff:
@@ -55,13 +51,17 @@ A nested loop is simpler and easier to read, while a grouping-based approach is 
 
 **a. How you used AI**
 
-- How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
-- What kinds of prompts or questions were most helpful?
+I used AI tools mainly for design brainstorming, debugging, and improving the structure of the code. I used it to think through how to model the classes, refine the scheduling logic, and fix issues in the Streamlit app.
+
+The most helpful prompts were specific and focused, such as asking to fix a particular bug, improve UI behavior, or validate whether my logic made sense. I avoided vague prompts and instead described exactly what my code was doing and what I wanted to change.
 
 **b. Judgment and verification**
 
-- Describe one moment where you did not accept an AI suggestion as-is.
-- How did you evaluate or verify what the AI suggested?
+One moment where I did not accept an AI suggestion directly was when it suggested changes to my scheduling logic and task completion flow. The suggestion introduced assumptions about how tasks should be handled that did not match my existing backend design.
+
+Instead of applying it blindly, I checked how my current classes and methods actually worked, especially around mark_complete() and how tasks were added back for recurrence. I compared the AI suggestion with my implementation and only adopted the parts that aligned with my design.
+
+To verify the changes, I tested the behavior in the app and also relied on my existing test cases to make sure nothing broke. This helped me ensure that the final implementation was correct and consistent with my system.
 
 ---
 
@@ -69,13 +69,17 @@ A nested loop is simpler and easier to read, while a grouping-based approach is 
 
 **a. What you tested**
 
-- What behaviors did you test?
-- Why were these tests important?
+I tested key behaviors like task scheduling, conflict detection, task completion, and recurrence handling.
+
+I checked whether tasks were correctly selected based on priority and available time, whether conflicts were flagged properly, and whether recurring tasks were generated correctly after marking tasks as complete.
+
+These tests were important to make sure the system behaves as expected in real scenarios. Since the app involves multiple interacting components (tasks, pets, scheduling logic), testing helped ensure that changes in one part did not break other parts and that the overall planning logic remained reliable.
 
 **b. Confidence**
 
-- How confident are you that your scheduler works correctly?
-- What edge cases would you test next if you had more time?
+I am fairly confident that the scheduler works correctly for the main cases I designed it for. It can add tasks, prioritize them, fit them within the available time, detect basic conflicts, and handle recurring tasks when they are marked complete.
+
+If I had more time, I would test more edge cases such as tasks with the same score, multiple recurring tasks across several days, duplicate task names, very large numbers of tasks, and more detailed time-based conflicts within the same day. I would also test more cases around editing or removing tasks after a schedule has already been generated.
 
 ---
 
@@ -83,12 +87,15 @@ A nested loop is simpler and easier to read, while a grouping-based approach is 
 
 **a. What went well**
 
-- What part of this project are you most satisfied with?
+The part I am most satisfied with is the initial design phase where I created the classes and structured the system. I had always struggled with understanding how to properly implement object-oriented programming, but working on this project helped me apply those concepts in a practical way. Defining classes like Owner, Pet, Task, and DailyPlan and seeing how they interact made everything much clearer. It was very satisfying to see the design come together and actually work in the app.
 
 **b. What you would improve**
 
-- If you had another iteration, what would you improve or redesign?
+If I had another iteration, I would improve the scheduling system by making it more realistic and flexible. Right now, it creates a good daily plan, but I would like to support true time-based scheduling with actual start and end times instead of just ordering tasks. I would also improve conflict detection, allow users to edit or remove tasks more easily, and make better use of owner preferences in scheduling decisions. Overall, I would focus on making the app feel more complete and closer to a real pet care planner.
 
 **c. Key takeaway**
 
-- What is one important thing you learned about designing systems or working with AI on this project?
+One important thing I learned is that designing a system requires clear thinking about how different parts interact, not just writing code. Breaking the problem into classes like Owner, Pet, Task, and DailyPlan helped me understand how to structure the solution properly.
+
+I also learned that AI tools are most helpful when used carefully. Instead of accepting suggestions directly, I needed to verify them against my own design and test them. This helped me use AI as a support tool rather than relying on it blindly.
+
